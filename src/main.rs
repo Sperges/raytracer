@@ -1,7 +1,3 @@
-use std::fs;
-
-fn main() -> std::io::Result<()> {
+fn main() {
     println!("Hello, world!");
-    fs::write("output.ppm", "")?;
-    Ok(())
 }
