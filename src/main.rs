@@ -1,6 +1,12 @@
+mod ray;
 mod vec3;
 
-use vec3::*;
+mod prelude {
+    pub use crate::ray::*;
+    pub use crate::vec3::*;
+}
+
+use prelude::*;
 
 fn write_color(pixel_color: Color) {
     let ir = (255.999 * pixel_color.x) as f64;
@@ -14,7 +20,6 @@ fn write_color(pixel_color: Color) {
 // }
 
 fn main() {
-
     // Image
     const IMAGE_HEIGHT: usize = 256;
     const IMAGE_WIDTH: usize = 256;
@@ -29,7 +34,8 @@ fn main() {
     for j in (0..IMAGE_HEIGHT).rev() {
         eprint!("\rScanlines remaining: {}", j);
         for i in 0..IMAGE_WIDTH {
-            let pixel_color: Color = Color::new(i as f64 / (width - 1.0),j as f64 / (height - 1.0),0.25);
+            let pixel_color: Color =
+                Color::new(i as f64 / (width - 1.0), j as f64 / (height - 1.0), 0.25);
             write_color(pixel_color);
         }
     }
