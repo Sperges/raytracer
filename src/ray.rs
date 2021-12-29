@@ -1,8 +1,8 @@
 use crate::prelude::*;
 
 pub struct Ray {
-    orig: Point3,
-    dir: Vec3,
+    pub orig: Point3,
+    pub dir: Vec3,
 }
 
 impl Ray {

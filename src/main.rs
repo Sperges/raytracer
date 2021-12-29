@@ -9,6 +9,10 @@ fn write_color(pixel_color: Color) {
     println!("{} {} {}", ir, ig, ib);
 }
 
+// fn ray_color(ray: Ray) -> Color {
+//     let unit_direction: Vec3 = ray.dir;
+// }
+
 fn main() {
 
     // Image
