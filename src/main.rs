@@ -3,6 +3,7 @@ mod vec3;
 mod hittable;
 mod sphere;
 mod hittable_list;
+mod rtweekend;
 
 
 mod prelude {
@@ -11,6 +12,7 @@ mod prelude {
     pub use crate::hittable::*;
     pub use crate::sphere::*;
     pub use crate::hittable_list::*;
+    pub use crate::rtweekend::*;
 }
 
 use prelude::*;
@@ -22,28 +24,15 @@ fn write_color(pixel_color: Color) {
     println!("{} {} {}", ir, ig, ib);
 }
 
-fn ray_color(ray: Ray) -> Color {
-    let mut t = hit_sphere(Point3::from(0.0, 0.0, -1.0), 0.5, &ray);
-    if t > 0.0 {
-        let n = (ray.at(t) - Vec3::from(0.0, 0.0, -1.0)).unit_vector();
-        return 0.5 * Color::from(n.x + 1.0,  n.y + 1.0, n.z +1.0)
+fn ray_color(ray: &mut Ray, world: &mut HittableList) -> Color {
+    let mut rec = HitRecord::new();
+    if world.hit(ray, 0.0, INFINITY, &mut rec) {
+        return 0.5 * (rec.normal + Color::from(1.0, 1.0, 1.0))
     }
-    let unit_direction: Vec3 = ray.dir.unit_vector();
-    t = 0.5 * (unit_direction.y + 1.0);
-     return (1.0 - t) * Color::from(1.0, 1.0, 1.0) + t * Color::from(0.5, 0.7, 1.0)
-}
 
-fn hit_sphere(center: Point3, radius: f64, ray: &Ray) -> f64 {
-    let oc = ray.orig - center;
-    let a = ray.dir.length_squared();
-    let half_b = oc.dot(&ray.dir);
-    let c = oc.length_squared() - radius * radius;
-    let discriminant = half_b * half_b - a * c;
-    if discriminant < 0.0 {
-        return -1.0
-    } else {
-        return (-half_b - discriminant.sqrt()) / a
-    }
+    let unit_direction: Vec3 = ray.dir.unit_vector();
+    let t = 0.5*(unit_direction.y + 1.0);
+    return (1.0 - t) * Color::from(1.0, 1.0, 1.0) + t * Color::from(0.5, 0.7, 1.0)
 }
 
 fn main() {
@@ -54,6 +43,11 @@ fn main() {
 
     let width = IMAGE_WIDTH as f64;
     let height = IMAGE_HEIGHT as f64;
+
+    //World
+    let mut world = HittableList::new();
+    world.add_sphere(Sphere::new(Point3::from(0.0, -100.5, -1.0), 100.0));
+    world.add_sphere(Sphere::new(Point3::from(0.0, 0.0, -1.0), 0.5));
 
     // Camera
     let viewport_height = 2.0;
@@ -74,8 +68,8 @@ fn main() {
         for i in 0..IMAGE_WIDTH {
             let u = i as f64 / (width - 1.0);
             let v = j as f64 / (height - 1.0);
-            let ray: Ray = Ray::new(origin, lower_left_corner + u * horizontal + v * vertical - origin);
-            let pixel_color = ray_color(ray);
+            let mut ray: Ray = Ray::new(origin, lower_left_corner + u * horizontal + v * vertical - origin);
+            let pixel_color = ray_color(&mut ray, &mut world);
             write_color(pixel_color);
         }
     }
