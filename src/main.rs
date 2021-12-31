@@ -1,9 +1,16 @@
 mod ray;
 mod vec3;
+mod hittable;
+mod sphere;
+mod hittable_list;
+
 
 mod prelude {
     pub use crate::ray::*;
     pub use crate::vec3::*;
+    pub use crate::hittable::*;
+    pub use crate::sphere::*;
+    pub use crate::hittable_list::*;
 }
 
 use prelude::*;
@@ -16,26 +23,26 @@ fn write_color(pixel_color: Color) {
 }
 
 fn ray_color(ray: Ray) -> Color {
-    let mut t = hit_sphere(Point3::new(0.0, 0.0, -1.0), 0.5, &ray);
+    let mut t = hit_sphere(Point3::from(0.0, 0.0, -1.0), 0.5, &ray);
     if t > 0.0 {
-        let n = (ray.at(t) - Vec3::new(0.0, 0.0, -1.0)).unit_vector();
-        return 0.5 * Color::new(n.x + 1.0,  n.y + 1.0, n.z +1.0)
+        let n = (ray.at(t) - Vec3::from(0.0, 0.0, -1.0)).unit_vector();
+        return 0.5 * Color::from(n.x + 1.0,  n.y + 1.0, n.z +1.0)
     }
     let unit_direction: Vec3 = ray.dir.unit_vector();
     t = 0.5 * (unit_direction.y + 1.0);
-     return (1.0 - t) * Color::new(1.0, 1.0, 1.0) + t * Color::new(0.5, 0.7, 1.0)
+     return (1.0 - t) * Color::from(1.0, 1.0, 1.0) + t * Color::from(0.5, 0.7, 1.0)
 }
 
 fn hit_sphere(center: Point3, radius: f64, ray: &Ray) -> f64 {
     let oc = ray.orig - center;
-    let a = ray.dir.dot(ray.dir);
-    let b = 2.0 * oc.dot(ray.dir);
-    let c = oc.dot(oc) - radius * radius;
-    let discriminant = b * b - 4.0 * a * c;
+    let a = ray.dir.length_squared();
+    let half_b = oc.dot(&ray.dir);
+    let c = oc.length_squared() - radius * radius;
+    let discriminant = half_b * half_b - a * c;
     if discriminant < 0.0 {
         return -1.0
     } else {
-        return (-b - discriminant.sqrt()) / (2.0 * a)
+        return (-half_b - discriminant.sqrt()) / a
     }
 }
 
@@ -53,11 +60,11 @@ fn main() {
     let viewport_width = ASPECT_RATIO * viewport_height;
     let focal_length = 1.0;
 
-    let origin = Point3::new(0.0, 0.0, 0.0);
-    let horizontal = Vec3::new(viewport_width, 0.0, 0.0);
-    let vertical = Vec3::new(0.0, viewport_height, 0.0);
+    let origin = Point3::new();
+    let horizontal = Vec3::from(viewport_width, 0.0, 0.0);
+    let vertical = Vec3::from(0.0, viewport_height, 0.0);
     let lower_left_corner =
-        origin - horizontal / 2.0 - vertical / 2.0 - Vec3::new(0.0, 0.0, focal_length);
+        origin - horizontal / 2.0 - vertical / 2.0 - Vec3::from(0.0, 0.0, focal_length);
 
     // Render
     print!("P3\n{} {}\n255\n", IMAGE_WIDTH, IMAGE_HEIGHT);
