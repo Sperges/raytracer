@@ -1,5 +1,7 @@
 use std::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Neg, Sub};
 
+use crate::prelude::*;
+
 #[derive(Debug, Copy, Clone, PartialEq)]
 pub struct Vec3 {
     pub x: f64,
@@ -126,6 +128,32 @@ impl Vec3 {
 
     pub fn from(x: f64, y: f64, z: f64) -> Self {
         Self { x, y, z }
+    }
+
+    pub fn random() -> Self {
+        Self {
+            x: random_f64(),
+            y: random_f64(),
+            z: random_f64(),
+        }
+    }
+
+    pub fn random_range(min: f64, max: f64) -> Self {
+        Self {
+            x: random_f64_range(min, max),
+            y: random_f64_range(min, max),
+            z: random_f64_range(min, max),
+        }
+    }
+
+    pub fn random_in_unit_sphere() -> Self {
+        let mut p; 
+        loop {
+            p = Vec3::random_range(-1.0, 1.0);
+            if p.length_squared() < 1.0 {
+                return p
+            }
+        }
     }
 
     pub fn length(&self) -> f64 {

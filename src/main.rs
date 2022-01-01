@@ -20,13 +20,20 @@ mod prelude {
 
 use prelude::*;
 
-fn ray_color(ray: &mut Ray, world: &mut HittableList) -> Color {
+fn ray_color(ray: &mut Ray, world: &mut HittableList, depth: i64) -> Color {
     let mut rec = HitRecord::new();
-    if world.hit(ray, 0.0, INFINITY, &mut rec) {
-        return 0.5 * (rec.normal + Color::from(1.0, 1.0, 1.0));
+
+    if depth <= 0 {
+        return Color::new();
+    }
+    
+    if world.hit(ray, 0.001, INFINITY, &mut rec) {
+        //return 0.5 * (rec.normal + Color::from(1.0, 1.0, 1.0));
+        let target = rec.p + rec.normal + Vec3::random_in_unit_sphere();
+        return 0.5 * ray_color(&mut Ray::new(rec.p, target - rec.p), world, depth - 1)
     }
 
-    let unit_direction: Vec3 = ray.dir.unit_vector();
+    let unit_direction = ray.dir.unit_vector();
     let t = 0.5 * (unit_direction.y + 1.0);
     return (1.0 - t) * Color::from(1.0, 1.0, 1.0) + t * Color::from(0.5, 0.7, 1.0);
 }
@@ -36,7 +43,8 @@ fn main() {
     const ASPECT_RATIO: f64 = 16.0 / 9.0;
     const IMAGE_WIDTH: i64 = 400;
     const IMAGE_HEIGHT: i64 = (IMAGE_WIDTH as f64 / ASPECT_RATIO) as i64;
-    const SAMPLES_PER_PIXEL: i64 = 100;
+    const SAMPLES_PER_PIXEL: i64 = 16;
+    const MAX_DEPTH: i64 = 6;
 
     let width = IMAGE_WIDTH as f64;
     let height = IMAGE_HEIGHT as f64;
@@ -61,7 +69,7 @@ fn main() {
                 let u = (i as f64 + random_f64()) / (width - 1.0);
                 let v = (j as f64 + random_f64()) / (height - 1.0);
                 let mut ray = camera.get_ray(u, v);
-                pixel_color += ray_color(&mut ray, &mut world);
+                pixel_color += ray_color(&mut ray, &mut world, MAX_DEPTH);
             }
             write_color(pixel_color, samples);
         }
