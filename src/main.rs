@@ -1,26 +1,28 @@
 mod camera;
 mod color;
+mod hit_record;
 mod hittable;
-mod hittable_list;
 mod ray;
-mod rtweekend;
-mod sphere;
+mod util;
 mod vec3;
+mod world;
+mod sphere;
 
 mod prelude {
     pub use crate::camera::*;
     pub use crate::color::*;
+    pub use crate::hit_record::*;
     pub use crate::hittable::*;
-    pub use crate::hittable_list::*;
     pub use crate::ray::*;
-    pub use crate::rtweekend::*;
-    pub use crate::sphere::*;
+    pub use crate::util::*;
     pub use crate::vec3::*;
+    pub use crate::world::*;
+    pub use crate::sphere::*;
 }
 
 use prelude::*;
 
-fn ray_color(ray: &mut Ray, world: &mut HittableList, depth: i64) -> Color {
+fn ray_color(ray: &mut Ray, world: &mut World, depth: i64) -> Color {
     let mut rec = HitRecord::new();
 
     if depth <= 0 {
@@ -49,8 +51,8 @@ fn main() {
     let height = IMAGE_HEIGHT as f64;
     let samples = SAMPLES_PER_PIXEL as f64;
 
-    //World
-    let mut world = HittableList::new();
+    // World
+    let mut world = World::new();
     world.add_sphere(Sphere::new(Point3::from(0.0, -100.5, -1.0), 100.0));
     world.add_sphere(Sphere::new(Point3::from(0.0, 0.0, -1.0), 0.5));
 
@@ -61,7 +63,7 @@ fn main() {
     print!("P3\n{} {}\n255\n", IMAGE_WIDTH, IMAGE_HEIGHT);
 
     for j in (0..IMAGE_HEIGHT).rev() {
-        eprint!("\rScanlines remaining: {}", j);
+        eprint!("\rScanlines remaining: {}", j.to_string());
         for i in 0..IMAGE_WIDTH {
             let mut pixel_color = Color::new();
             for _ in 0..SAMPLES_PER_PIXEL {
