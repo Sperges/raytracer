@@ -17,8 +17,8 @@ impl World {
         self.objects.clear();
     }
 
-    pub fn add_sphere(&mut self, object: Sphere) {
-        self.objects.push(Box::new(object));
+    pub fn add_sphere(&mut self, sphere: Sphere) {
+        self.objects.push(Box::new(sphere));
     }
 }
 
