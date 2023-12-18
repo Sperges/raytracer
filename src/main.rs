@@ -7,6 +7,7 @@ mod util;
 mod vec3;
 mod world;
 mod sphere;
+mod interval;
 
 mod prelude {
     pub use crate::camera::*;
@@ -18,6 +19,7 @@ mod prelude {
     pub use crate::vec3::*;
     pub use crate::world::*;
     pub use crate::sphere::*;
+	pub use crate::interval::*;
 }
 
 use prelude::*;
@@ -34,7 +36,7 @@ fn ray_color_lambertian(ray: &mut Ray, world: &mut World, depth: i64) -> Color {
         return Color::new();
     }
     
-    if world.hit(ray, 0.001, INFINITY, &mut rec) {
+    if world.hit(ray, &Interval::from_f64(0.001, INFINITY), &mut rec) {
         let target = rec.p + rec.normal + Vec3::random_unit_vector();
         return 0.5 * ray_color_lambertian(&mut Ray::new(rec.p, target - rec.p), world, depth - 1)
     }
@@ -51,7 +53,7 @@ fn ray_color_hemisphere(ray: &mut Ray, world: &mut World, depth: i64) -> Color {
         return Color::new();
     }
     
-    if world.hit(ray, 0.001, INFINITY, &mut rec) {
+    if world.hit(ray, &Interval::from_f64(0.001, INFINITY), &mut rec) {
         let target = rec.p + Vec3::random_in_hemisphere(&rec.normal);
         return 0.5 * ray_color_hemisphere(&mut Ray::new(rec.p, target - rec.p), world, depth - 1)
     }
@@ -76,17 +78,18 @@ fn main() {
 
     // World
     let mut world = World::new();
-    world.add_sphere(Sphere::new(Point3::from(0.0, -100.5, -1.0), 100.0));
-    world.add_sphere(Sphere::new(Point3::from(0.0, 0.0, -1.0), 0.5));
+    world.add(Sphere::new(Point3::from(0.0, -100.5, -1.0), 100.0));
+    world.add(Sphere::new(Point3::from(0.0, 0.0, -1.0), 0.5));
 
     // Camera
     let camera = Camera::new();
 
     // Render
-    print!("P3\n{} {}\n255\n", IMAGE_WIDTH, IMAGE_HEIGHT);
+	let mut result = String::new();
+    result.push_str(&format!("P3\n{} {}\n255\n", IMAGE_WIDTH, IMAGE_HEIGHT));
 
-    for j in (0..IMAGE_HEIGHT).rev() {
-        eprint!("\rScanlines remaining: {}", j.to_string());
+    for j in 0..IMAGE_HEIGHT {
+        eprint!("\rScanlines remaining: {}", j);
         for i in 0..IMAGE_WIDTH {
             let mut pixel_color = Color::new();
             for _ in 0..SAMPLES_PER_PIXEL {
@@ -99,9 +102,10 @@ fn main() {
                 }
                 
             }
-            write_color(pixel_color, samples);
+            result.push_str(&write_color(pixel_color, samples));
         }
     }
 
     eprintln!("\nDone.");
+	println!("{}", result);
 }

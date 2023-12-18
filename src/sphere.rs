@@ -16,7 +16,7 @@ impl Sphere {
 }
 
 impl Hittable for Sphere {
-    fn hit(&self, ray: &Ray, t_min: f64, t_max: f64, rec: &mut HitRecord) -> bool {
+    fn hit(&self, ray: &Ray, ray_t: &Interval, rec: &mut HitRecord) -> bool {
         let oc = ray.orig - self.center;
         let a = ray.dir.length_squared();
         let half_b = oc.dot(&ray.dir);
@@ -30,9 +30,9 @@ impl Hittable for Sphere {
 
         // Find nearest root in acceptable range
         let mut root = (-half_b - sqrtd) / a;
-        if root < t_min || t_max < root {
+        if !ray_t.surrounds(root) {
             root = (-half_b + sqrtd) / a;
-            if root < t_min || t_max < root {
+            if !ray_t.surrounds(root) {
                 return false
             }
         }

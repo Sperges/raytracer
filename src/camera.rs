@@ -16,13 +16,13 @@ impl Camera {
 
         let origin = Point3::new();
         let horizontal = Vec3::from(viewport_width, 0.0, 0.0);
-        let vertical = Vec3::from(0.0, viewport_height, 0.0);
-        let lower_left_corner =
+        let vertical = Vec3::from(0.0, -viewport_height, 0.0);
+        let upper_left_corner =
             origin - horizontal / 2.0 - vertical / 2.0 - Vec3::from(0.0, 0.0, focal_length);
 
         Self {
             origin,
-            lower_left_corner,
+            lower_left_corner: upper_left_corner,
             horizontal,
             vertical,
         }

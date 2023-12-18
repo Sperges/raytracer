@@ -17,19 +17,19 @@ impl World {
         self.objects.clear();
     }
 
-    pub fn add_sphere(&mut self, sphere: Sphere) {
-        self.objects.push(Box::new(sphere));
+    pub fn add<T>(&mut self, object: T) where T: Hittable + 'static {
+        self.objects.push(Box::new(object));
     }
 }
 
 impl Hittable for World {
-    fn hit(&self, ray: &Ray, t_min: f64, t_max: f64, rec: &mut HitRecord) -> bool {
+    fn hit(&self, ray: &Ray, ray_t: &Interval, rec: &mut HitRecord) -> bool {
         let mut hit_anything = false;
-        let mut closest_so_far = t_max;
+        let mut closest_so_far = ray_t.max;
 
         for object in self.objects.iter() {
             let mut temp_rec = HitRecord::new();
-            if object.hit(ray, t_min, t_max, &mut temp_rec) {
+            if object.hit(ray, &Interval::from_f64(ray_t.min, closest_so_far), &mut temp_rec) {
                 hit_anything = true;
                 closest_so_far = temp_rec.t;
                 rec.p = temp_rec.p;
